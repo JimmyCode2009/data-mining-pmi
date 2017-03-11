@@ -11,6 +11,51 @@ import os
 import sys
 import multiprocessing
 
+def SayHi(i):
+    print "HA: ", i
+
+def ChainWords(gramNumber, fd, words):
+        """Used to chain words into gramNumber
+        Args:
+            gramNumber, n-gram
+            fd, output file
+            words, collections of words
+        Return:
+            return words left after generate grams
+        """
+        assert gramNumber > 0, 'gramNumber must be greater than 0'
+        size = len(words)
+        for i in xrange(size - gramNumber + 1):
+            fd.write("\t".join(words[i:i+gramNumber]))
+            fd.write("\n")
+        return words[-(gramNumber - 1):]
+
+
+def PrepareCommon(gramNumber, inputFile, outputFile):
+    """split by non [A-Za-z0-9]+ characters"""
+    print "Start preparing: %s %s %s" % (str(0), inputFile, outputFile)
+    words = []
+    with open(outputFile, 'w') as outFd:
+        print "Start preparing: %s %s %s" % (str(1), inputFile, outputFile)
+        with open(inputFile, 'r') as inFd:
+            print "Start preparing: %s %s %s" % (str(2), inputFile, outputFile)
+            for line in inFd:
+                words.extend(re.split(r'[^0-9A-Za-z]+', line.strip()))
+                words = map(lambda word:word.lower(), words)
+                # empty or single character
+                words = filter(lambda word:len(word) > 1, words)
+                # pure number
+                words = filter(lambda word:not re.match(r'^[0-9]+$', word), words)
+                # number & a-z combination
+                words = filter(lambda word:not re.search(r'.*([0-9][a-z])|([a-z][0-9]).*', word), words)
+                # single repeated character
+                words = filter(lambda word: not re.match(r'^([a-z])\1*$', word), words)
+                words = ChainWords(gramNumber, outFd, words)
+        if words:
+            outFd.write("\t".join(words))
+            outFd.write("\n")
+    print "End preparing: %s" % str(gramNumber)
+
 class PrepareWords(object):
     """Prepare gram file and candidate file"""
 
@@ -19,7 +64,7 @@ class PrepareWords(object):
         assert os.path.exists(self._inputFile), 'File %s not existed' % self._inputFile
         self._outputGramFile = outputGramFile
         self._outputCandidateFile = outputCandidateFile
-        self._pool = multiprocessing.Pool(2)
+        self._args = []
 
     def chainWords(self, gramNumber, fd, words):
         """Used to chain words into gramNumber
@@ -37,11 +82,13 @@ class PrepareWords(object):
             fd.write("\n")
         return words[-(gramNumber - 1):]
 
-    def prepareCommon(self, gramNumber, fileName):
+    @staticmethod
+    def prepareCommon(gramNumber, inputFile, outputFile):
         """split by non [A-Za-z0-9]+ characters"""
+        print "Start preparing: %s" % str(gramNumber)
         words = []
-        with open(fileName, 'w') as outFd:
-            with open(self._inputFile) as inFd:
+        with open(outputFile, 'w') as outFd:
+            with open(inputFile) as inFd:
                 for line in inFd:
                     words.extend(re.split(r'[^0-9A-Za-z]+', line.strip()))
                     words = map(lambda word:word.lower(), words)
@@ -57,6 +104,7 @@ class PrepareWords(object):
             if words:
                 outFd.write("\t".join(words))
                 outFd.write("\n")
+        print "End preparing: %s" % str(gramNumber)
 
     def prepareGram(self, gramNumber):
         """generate gramNumber specified file
@@ -72,9 +120,7 @@ class PrepareWords(object):
         p1.daemon = True
         p1.start()
         """
-        p1 = self._pool.apply_async(self.prepareCommon,
-                (gramNumber, self._outputGramFile))
-
+        self._args.append((gramNumber, self._inputFile, self._outputGramFile))
 
 
     def prepareCandidate(self, candidateNumber):
@@ -91,12 +137,15 @@ class PrepareWords(object):
         p1.daemon = True
         p1.start()
         """
-        p1 = self._pool.apply_async(self.prepareCommon,
-                (candidateNumber, self._outputGramFile))
+        self._args.append((candidateNumber, self._inputFile, self._outputCandidateFile))
 
-    def start(self):
-        self._pool.close()
-        self._pool.join()
+    def run(self):
+        pool = multiprocessing.Pool(processes = 3)
+        for args in self._args:
+            print args
+            pool.apply_async(PrepareCommon, args)
+        pool.close()
+        pool.join()
 
 
 def test():
@@ -109,7 +158,8 @@ def test():
     prep = PrepareWords(inputFile, outputGramFile, outputCandidateFile)
     prep.prepareGram(gramNumber)
     prep.prepareCandidate(candidateNumber)
-    prep.start()
+    prep.run()
+
 
 if __name__ == '__main__':
     test()
