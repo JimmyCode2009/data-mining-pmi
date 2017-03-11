@@ -41,13 +41,15 @@ class Process(object):
 
     def buildTrie(self):
         """Generate StringTrie"""
+        Count = 0
         with open(self._gramFile) as fd:
             for line in fd:
                 key = line.strip()
-                if self._trie.has_key(key):
-                    self._trie[key] += 1
-                else:
-                    self._trie[key] = 1
+                self._trie.setdefault(key, 0)
+                self._trie[key] += 1
+                Count += 1
+                if Count % 100000 == 0:
+                    print "Count: ", Count
         #with open(self._trieFile, 'w') as fd:
         #    pickle.dump(self._trie, fd)
 

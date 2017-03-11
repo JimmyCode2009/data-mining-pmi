@@ -50,7 +50,7 @@ class PrepareWords(object):
                     # number & a-z combination
                     words = filter(lambda word:not re.search(r'.*([0-9][a-z])|([a-z][0-9]).*', word), words)
                     # single repeated character
-                    #words = filter(lambda word: not re.match(r'^([a-z])\1*$', word), words)
+                    words = filter(lambda word: not re.match(r'^([a-z])\1*$', word), words)
                     words = self.chainWords(gramNumber, outFd, words)
             if words:
                 outFd.write("\t".join(words))
