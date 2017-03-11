@@ -11,9 +11,6 @@ import os
 import sys
 import multiprocessing
 
-def SayHi(i):
-    print "HA: ", i
-
 def ChainWords(gramNumber, fd, words):
         """Used to chain words into gramNumber
         Args:
@@ -33,12 +30,9 @@ def ChainWords(gramNumber, fd, words):
 
 def PrepareCommon(gramNumber, inputFile, outputFile):
     """split by non [A-Za-z0-9]+ characters"""
-    print "Start preparing: %s %s %s" % (str(0), inputFile, outputFile)
     words = []
     with open(outputFile, 'w') as outFd:
-        print "Start preparing: %s %s %s" % (str(1), inputFile, outputFile)
         with open(inputFile, 'r') as inFd:
-            print "Start preparing: %s %s %s" % (str(2), inputFile, outputFile)
             for line in inFd:
                 words.extend(re.split(r'[^0-9A-Za-z]+', line.strip()))
                 words = map(lambda word:word.lower(), words)
@@ -54,7 +48,6 @@ def PrepareCommon(gramNumber, inputFile, outputFile):
         if words:
             outFd.write("\t".join(words))
             outFd.write("\n")
-    print "End preparing: %s" % str(gramNumber)
 
 class PrepareWords(object):
     """Prepare gram file and candidate file"""
@@ -82,7 +75,6 @@ class PrepareWords(object):
             fd.write("\n")
         return words[-(gramNumber - 1):]
 
-    @staticmethod
     def prepareCommon(gramNumber, inputFile, outputFile):
         """split by non [A-Za-z0-9]+ characters"""
         print "Start preparing: %s" % str(gramNumber)
