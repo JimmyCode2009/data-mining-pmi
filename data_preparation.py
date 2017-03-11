@@ -9,6 +9,7 @@ It can generate n-gram words.
 import re
 import os
 import sys
+import multiprocessing
 
 class PrepareWords(object):
     """Prepare gram file and candidate file"""
@@ -18,6 +19,7 @@ class PrepareWords(object):
         assert os.path.exists(self._inputFile), 'File %s not existed' % self._inputFile
         self._outputGramFile = outputGramFile
         self._outputCandidateFile = outputCandidateFile
+        self._pool = multiprocessing.Pool(2)
 
     def chainWords(self, gramNumber, fd, words):
         """Used to chain words into gramNumber
@@ -61,25 +63,53 @@ class PrepareWords(object):
         Args:
             gramNumber, n-gram, n = gramNumber
         """
+        """
         self.prepareCommon(gramNumber, self._outputGramFile)
+        """
+        """
+        p1 = multiprocessing.Process(target=self.prepareCommon,
+                args=(gramNumber, self._outputGramFile))
+        p1.daemon = True
+        p1.start()
+        """
+        p1 = self._pool.apply_async(self.prepareCommon,
+                (gramNumber, self._outputGramFile))
+
+
 
     def prepareCandidate(self, candidateNumber):
         """generate candidate number specified file
         Args:
             candidateNumber, how many words should be used to generate a candidate
         """
+        """
         self.prepareCommon(candidateNumber, self._outputCandidateFile)
+        """
+        """
+        p1 = multiprocessing.Process(target=self.prepareCommon,
+                args=(candidateNumber, self._outputCandidateFile))
+        p1.daemon = True
+        p1.start()
+        """
+        p1 = self._pool.apply_async(self.prepareCommon,
+                (candidateNumber, self._outputGramFile))
+
+    def start(self):
+        self._pool.close()
+        self._pool.join()
+
 
 def test():
     gramNumber = 3
     candidateNumber = 2
     #inputFile = '/home/yang/work/pmi/shakespeare/t8.shakespeare.txt'
-    inputFile = '/home/yang/work/pmi/wikipedia/amazon/total.txt'
+    inputFile = './data/total.txt'
     outputGramFile = './data/%s-gram.txt' % str(gramNumber)
     outputCandidateFile = './data/%s-candidate.txt' % str(candidateNumber)
     prep = PrepareWords(inputFile, outputGramFile, outputCandidateFile)
     prep.prepareGram(gramNumber)
     prep.prepareCandidate(candidateNumber)
+    prep.start()
 
 if __name__ == '__main__':
     test()
