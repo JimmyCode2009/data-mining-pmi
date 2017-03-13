@@ -146,7 +146,7 @@ class Process(object):
                         # frequences filter
                         #if XYFreq < 2 or XYFreq > 24:
                         #    continue
-                        if YFreq == 0 or XFreq == 0:
+                        if YFreq == 0 or XFreq == 0 or XYFreq == 0:
                             # because when generating grams, we last last words' frequency
                             continue
                         PX = XFreq * 1.0 / totalFreq
