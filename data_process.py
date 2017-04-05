@@ -23,7 +23,7 @@ import pickle
 import argparse
 
 import pygtrie as trie
-from  timeutil import TimeUtil
+from timeutil import TimeUtil
 
 class Process(object):
     """Generate score with gram file and candidate file"""
@@ -51,7 +51,7 @@ class Process(object):
                 if Count % 100000 == 0:
                     print "Count: ", Count
         #with open(self._trieFile, 'w') as fd:
-        #    pickle.dump(self._trie, fd)
+        #   pickle.dump(self._trie, fd)
 
     def lazySum(self, key):
         if not self._cache.has_key(key):
@@ -72,7 +72,9 @@ class Process(object):
                     words = line.strip().split('\t')
                     if len(words) < 2 or any(map(lambda word:len(word)<2, words)):
                         continue
-
+                    #The last word in the whole text is lost frequency
+                    if not self._trie.has_key(words[1]):
+                        continue
                     XFreq = self.lazySum(words[0])
                     YFreq = self.lazySum(words[1])
                     XYFreq = self.lazySum(line.strip())
@@ -90,22 +92,22 @@ class Process(object):
 def test():
     gramNumber = 3
     candidateNumber = 2
-    gramFile = './data/%s-gram.txt' % str(gramNumber)
-    candidateFile = './data/%s-candidate.txt' % str(candidateNumber)
-    scoreFile = './data/%s-score.txt' % str(candidateNumber)
+    gramFile = r'C:\Users\yafe\Downloads\%s-gram.txt' % str(gramNumber)
+    candidateFile = r'C:\Users\yafe\Downloads\%s-candidate.txt' % str(candidateNumber)
+    scoreFile = r'C:\Users\yafe\Downloads\%s-score.txt' % str(candidateNumber)
     prop = Process(gramFile, candidateFile, scoreFile)
     tu = TimeUtil()
     tu.start()
     prop.buildTrie()
     tu.elapsedSeconds()
     tu.reset()
-    key1 = 'the\tfuture\tand'
+    key1 = 'acronyms\tand\tterms'
     key2 = 'not\tplaced\tin'
     print prop._trie.has_key(key1)
     print prop._trie.has_key(key2)
     tu.elapsedSeconds()
     tu.reset()
-    print sum(prop._trie.itervalues(prefix='your'))
+    print sum(prop._trie.itervalues(prefix='additional'))
     tu.elapsedSeconds()
     tu.reset()
     prop.generateScore()
@@ -114,9 +116,9 @@ def test():
 def test1():
     gramNumber = 3
     candidateNumber = 2
-    gramFile = './data/%s-gram.txt' % str(gramNumber)
-    candidateFile = './data/%s-candidate.txt' % str(candidateNumber)
-    scoreFile = './data/%s-score.txt' % str(candidateNumber)
+    gramFile = r'C:\Users\yafe\Downloads\%s-gram.txt' % str(gramNumber)
+    candidateFile = r'C:\Users\yafe\Downloads\%s-candidate.txt' % str(candidateNumber)
+    scoreFile = r'C:\Users\yafe\Downloads\%s-score.txt' % str(candidateNumber)
     prop = Process(gramFile, candidateFile, scoreFile)
     tu = TimeUtil()
     tu.start()
@@ -125,6 +127,7 @@ def test1():
 
 
 if __name__ == '__main__':
+    '''
     parser = argparse.ArgumentParser()
     parser.add_argument('-u', action='store_true', default=False)
     opts = parser.parse_args(sys.argv[1:])
@@ -132,4 +135,6 @@ if __name__ == '__main__':
         test1()
     else:
         test()
+    '''
+    test()
 

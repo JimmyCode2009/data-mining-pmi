@@ -75,7 +75,7 @@ class PrepareWords(object):
             fd.write("\n")
         return words[-(gramNumber - 1):]
 
-    def prepareCommon(gramNumber, inputFile, outputFile):
+    def prepareCommon(self, gramNumber, inputFile, outputFile):
         """split by non [A-Za-z0-9]+ characters"""
         print "Start preparing: %s" % str(gramNumber)
         words = []
@@ -143,10 +143,9 @@ class PrepareWords(object):
 def test():
     gramNumber = 3
     candidateNumber = 2
-    #inputFile = '/home/yang/work/pmi/shakespeare/t8.shakespeare.txt'
-    inputFile = './data/total.txt'
-    outputGramFile = './data/%s-gram.txt' % str(gramNumber)
-    outputCandidateFile = './data/%s-candidate.txt' % str(candidateNumber)
+    inputFile = r'C:\Users\yafe\Downloads\test.txt'
+    outputGramFile = r'C:\Users\yafe\Downloads\%s-gram.txt' % str(gramNumber)
+    outputCandidateFile = r'C:\Users\yafe\Downloads\%s-candidate.txt' % str(candidateNumber)
     prep = PrepareWords(inputFile, outputGramFile, outputCandidateFile)
     prep.prepareGram(gramNumber)
     prep.prepareCandidate(candidateNumber)
