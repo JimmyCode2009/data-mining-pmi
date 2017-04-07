@@ -169,13 +169,13 @@ def test_pre_post_trie():
     prop = Process(gramFile, candidateFile, scoreFile)
     prop.buildTrie()
     print "pre_trie------------"
-    for item in prop._pretrie.iteritems(prefix="information\ttheory"):
+    for item in prop._pretrie.iteritems(prefix="include\tsource"):
         print item
     print "post_trie-----------"
-    for item in prop._posttrie.iteritems(prefix="information\ttheory"):
+    for item in prop._posttrie.iteritems(prefix="include\tsource"):
         print item
     #prop.generateScore()
-    prop.computeEntropy("information\ttheory")
+    prop.computeEntropy("include\tsource")
 
 if __name__ == '__main__':
     test_pre_post_trie()
